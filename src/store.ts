@@ -1,7 +1,10 @@
 import {
   Action,
+  AnyAction,
   configureStore,
   createSlice,
+  Dispatch,
+  Middleware,
   PayloadAction,
   ThunkAction,
 } from "@reduxjs/toolkit";
@@ -34,8 +37,24 @@ export const counterSlice = createSlice({
 
 export const { increment, decrement, incrementByAmount } = counterSlice.actions;
 
+export const loggerMiddleware: Middleware<
+  {},
+  CounterState,
+  Dispatch<AnyAction>
+> = (store) => (next) => (action) => {
+  console.group(action.type);
+  console.info(`Dispatching ->`, action);
+  let result = next(action);
+  console.log(`next state ${store.getState()}`);
+  console.groupEnd();
+  return result;
+};
 export const store = configureStore({
   reducer: counterSlice.reducer,
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware(),
+    loggerMiddleware,
+  ],
 });
 
 export type AppDispath = typeof store.dispatch;
